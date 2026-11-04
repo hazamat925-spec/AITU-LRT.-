@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LRT Astana — прототип</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6f8;--card:#fff;--tx:#12202b;--mu:#66788a;--ac:#0a7cff;--ok:#1a9c5b;--wa:#e0a100;--er:#d63c3c;--bd:#e1e6eb}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1419;--card:#18212a;--tx:#e8eef3;--mu:#8fa1b1;--ac:#4a9dff;--bd:#2a3642}}
+:root[data-theme="dark"]{--bg:#0e1419;--card:#18212a;--tx:#e8eef3;--mu:#8fa1b1;--ac:#4a9dff;--bd:#2a3642}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding-bottom:76px}
+body.big{font-size:20px}
+header{display:flex;gap:8px;align-items:center;padding:12px 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+header h1{font-size:1.1em;margin:0;flex:1}
+select,button,input{font:inherit;color:var(--tx)}
+select,.chip{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 8px}
+.chip{cursor:pointer}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{padding:0 14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:0 0 10px}
+h2{font-size:1em;margin:4px 0 8px}
+.mu{color:var(--mu);font-size:.85em}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:11px 14px;width:100%;cursor:pointer;font-weight:600}
+.row{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--bd)}
+.row:first-of-type{border-top:0}
+.min{font-weight:700;font-size:1.2em;min-width:64px;text-align:right}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.alert{background:color-mix(in srgb,var(--er) 15%,var(--card));border-color:var(--er)}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;background:none;border:0;padding:9px 2px;font-size:.72em;color:var(--mu);cursor:pointer}
+nav button.on{color:var(--ac);font-weight:700}
+nav i{display:block;font-style:normal;font-size:1.5em}
+.tab{display:none}.tab.on{display:block}
+.sel{display:flex;gap:8px;margin-bottom:8px}.sel select{flex:1}
+.qr{display:block;margin:8px auto;width:180px;height:180px;background:#fff;padding:8px;border-radius:8px}
+.star{cursor:pointer;background:none;border:0;font-size:1.3em;color:var(--wa)}
+</style></head><body>
+<header><h1>🚈 LRT Astana</h1>
+<select id="lang"><option value="ru">RU</option><option value="kk">KZ</option><option value="en">EN</option></select>
+<button class="chip" id="big" aria-label="Large text">A+</button></header>
+<main>
+<div id="alerts"></div>
+
+<section class="tab on" id="t0">
+ <div class="card"><h2 data-i="station"></h2>
+  <div class="sel"><select id="st"></select><button class="star" id="fav">☆</button></div>
+  <div id="fv" class="mu"></div></div>
+ <div class="card"><h2 data-i="arr"></h2><div id="arr"></div></div>
+</section>
+
+<section class="tab" id="t1">
+ <div class="card"><h2 data-i="map"></h2>
+  <svg id="map" viewBox="0 0 300 330" width="100%" role="img" aria-label="LRT map"></svg>
+  <div class="mu" data-i="maphint"></div></div>
+</section>
+
+<section class="tab" id="t2">
+ <div class="card"><h2 data-i="plan"></h2>
+  <div class="sel"><select id="from"></select><select id="to"></select></div>
+  <button class="btn" id="go" data-i="find"></button><div id="res"></div></div>
+</section>
+
+<section class="tab" id="t3">
+ <div class="card"><h2 data-i="buy"></h2>
+  <div class="sel" id="types"></div>
+  <button class="btn" id="pay" data-i="pay"></button></div>
+ <div class="card"><h2 data-i="my"></h2><div id="tix" class="mu"></div><svg id="qr" class="qr" viewBox="0 0 25 25" style="display:none"></svg></div>
+ <div class="card"><h2 data-i="hist"></h2><div id="hist" class="mu"></div></div>
+</section>
+
+<section class="tab" id="t4">
+ <div class="card"><h2 data-i="notif"></h2>
+  <label class="row"><span data-i="nDelay"></span><input type="checkbox" checked></label>
+  <label class="row"><span data-i="nFav"></span><input type="checkbox" checked></label></div>
+ <div class="card"><h2 data-i="report"></h2>
+  <select id="rep" style="width:100%;margin-bottom:8px"></select>
+  <button class="btn" id="send" data-i="send"></button><div id="rmsg" class="mu"></div></div>
+ <div class="card"><h2 data-i="admin"></h2>
+  <div class="mu" data-i="adminD"></div>
+  <button class="btn" id="delay" style="margin-top:8px" data-i="delayBtn"></button></div>
+</section>
+</main>
+<nav id="nav"></nav>
+
+<script>
+const T={
+ru:{station:"Станция",arr:"Ближайшие поезда",map:"Карта линии",maphint:"Нажмите на станцию — откроется расписание",plan:"Планировщик маршрута",find:"Построить маршрут",buy:"Купить билет",pay:"Оплатить",my:"Мои билеты",hist:"История поездок",notif:"Уведомления",nDelay:"Задержки и сбои",nFav:"Любимые станции",report:"Сообщить о проблеме",send:"Отправить",admin:"Панель оператора (демо)",adminD:"Оператор публикует сбой — пассажиры получают оповещение.",delayBtn:"Объявить задержку",nav:["Главная","Карта","Маршрут","Билеты","Ещё"],adult:"Взрослый",stu:"Студент",pen:"Пенсионер",noTix:"Активных билетов нет",noHist:"Пока пусто",empty:"Свободно",mid:"Средне",full:"Много людей",sent:"Спасибо! Обращение отправлено.",delayTxt:"Задержка движения ~7 мин",rep:["Сломан лифт","Грязно на станции","Не работает валидатор","Другое"],min:"мин",bus:"Пересадка на автобус №",fav:"Избранное: ",trip:"Поездка",left:"Осталось"},
+kk:{station:"Бекет",arr:"Жақын пойыздар",map:"Желі картасы",maphint:"Кестені ашу үшін бекетті басыңыз",plan:"Маршрут жоспарлау",find:"Маршрут құру",buy:"Билет сатып алу",pay:"Төлеу",my:"Менің билеттерім",hist:"Сапар тарихы",notif:"Хабарламалар",nDelay:"Кідірістер мен ақаулар",nFav:"Таңдаулы бекеттер",report:"Мәселе туралы хабарлау",send:"Жіберу",admin:"Оператор панелі (демо)",adminD:"Оператор ақауды жариялайды — жолаушыларға хабарлама барады.",delayBtn:"Кідіріс жариялау",nav:["Басты","Карта","Маршрут","Билет","Тағы"],adult:"Ересек",stu:"Студент",pen:"Зейнеткер",noTix:"Белсенді билет жоқ",noHist:"Әзірге бос",empty:"Бос",mid:"Орташа",full:"Адам көп",sent:"Рахмет! Өтініш жіберілді.",delayTxt:"Қозғалыс ~7 мин кешігуде",rep:["Лифт бұзылған","Бекет лас","Валидатор жұмыс істемейді","Басқа"],min:"мин",bus:"Автобусқа ауысу №",fav:"Таңдаулы: ",trip:"Сапар",left:"Қалды"},
+en:{station:"Station",arr:"Next trains",map:"Line map",maphint:"Tap a station to see its timetable",plan:"Route planner",find:"Find route",buy:"Buy a ticket",pay:"Pay",my:"My tickets",hist:"Trip history",notif:"Notifications",nDelay:"Delays and disruptions",nFav:"Favourite stations",report:"Report an issue",send:"Send",admin:"Operator panel (demo)",adminD:"The operator posts a disruption — passengers get an alert.",delayBtn:"Announce a delay",nav:["Home","Map","Route","Tickets","More"],adult:"Adult",stu:"Student",pen:"Senior",noTix:"No active tickets",noHist:"Nothing yet",empty:"Quiet",mid:"Moderate",full:"Crowded",sent:"Thanks! Report sent.",delayTxt:"Service delayed by ~7 min",rep:["Broken elevator","Dirty station","Validator not working","Other"],min:"min",bus:"Transfer to bus #",fav:"Favourites: ",trip:"Trip",left:"Left"}};
+const S=["Аэропорт","Вокзал","Экспо","Центр","Набережная","Левый берег","Депо"]; // демо-данные
+const P={adult:200,stu:100,pen:100};
+let L="ru",fav=new Set(),cur=0,type="adult",tix=[],hist=[],delay=false,crowd=[0,1,2,1,2,0,1];
+const $=id=>document.getElementById(id),t=k=>T[L][k];
+function render(){
+ document.documentElement.lang=L;
+ document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
+ $("nav").innerHTML=["🏠","🗺️","🧭","🎫","⚙️"].map((ic,i)=>`<button data-t="${i}" class="${i==tab?'on':''}"><i>${ic}</i>${t("nav")[i]}</button>`).join("");
+ $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=+b.dataset.t;showTab()});
+ const opts=S.map((s,i)=>`<option value="${i}">${s}</option>`).join("");
+ [["st",cur],["from",0],["to",6]].forEach(([id,v])=>{const el=$(id),old=el.value;el.innerHTML=opts;el.value=old||v});
+ $("st").value=cur;
+ $("types").innerHTML=Object.keys(P).map(k=>`<button class="chip ${k==type?'on':''}" data-k="${k}">${t(k=="adult"?"adult":k)} · ${P[k]}₸</button>`).join("");
+ $("types").querySelectorAll("button").forEach(b=>b.onclick=()=>{type=b.dataset.k;render()});
+ $("rep").innerHTML=t("rep").map(r=>`<option>${r}</option>`).join("");
+ $("alerts").innerHTML=delay?`<div class="card alert">⚠️ ${t("delayTxt")}</div>`:"";
+ arrivals();favs();tickets();drawMap();
+}
+function arrivals(){
+ const c=["var(--ok)","var(--wa)","var(--er)"],n=["empty","mid","full"];
+ const base=(cur*3)%5+2,add=delay?7:0;
+ $("arr").innerHTML=[0,1,2].map(i=>{const cl=(crowd[cur]+i)%3;
+  return `<div class="row"><div>→ ${i%2?S[0]:S[6]}<div class="mu"><span class="dot" style="background:${c[cl]}"></span>${t(n[cl])}</div></div><div class="min">${base+i*6+add} ${t("min")}</div></div>`}).join("");
+ $("fav").textContent=fav.has(cur)?"★":"☆";
+}
+function favs(){$("fv").textContent=fav.size?t("fav")+[...fav].map(i=>S[i]).join(", "):""}
+function drawMap(){
+ const x=i=>150+(i%2?-30:30)*(i==0||i==6?0:1),y=i=>25+i*46;
+ let s=`<polyline fill="none" stroke="var(--ac)" stroke-width="6" stroke-linejoin="round" points="${S.map((_,i)=>x(i)+","+y(i)).join(" ")}"/>`;
+ S.forEach((n,i)=>s+=`<g style="cursor:pointer" data-s="${i}"><circle cx="${x(i)}" cy="${y(i)}" r="${i==cur?11:8}" fill="var(--card)" stroke="${i==cur?'var(--er)':'var(--ac)'}" stroke-width="4"/><text x="${x(i)+18}" y="${y(i)+5}" fill="var(--tx)" font-size="14">${n}</text></g>`);
+ $("map").innerHTML=s;
+ $("map").querySelectorAll("g").forEach(g=>g.onclick=()=>{cur=+g.dataset.s;tab=0;showTab();render()});
+}
+function qr(seed){
+ let h=seed,r=()=>(h=(h*1103515245+12345)&0x7fffffff)%2,s="";
+ const f=(a,b)=>a<7&&b<7||a<7&&b>17||a>17&&b<7;
+ for(let a=0;a<25;a++)for(let b=0;b<25;b++){
+  let on=r();
+  if(f(a,b)){const m=Math.min(a%18,b%18,6-a%18,6-b%18);on=(a%18<7&&b%18<7)?(m==0||m>=2?1:0):on}
+  if(on)s+=`<rect x="${b}" y="${a}" width="1" height="1" fill="#000"/>`}
+ return s}
+function tickets(){
+ const q=$("qr");
+ if(!tix.length){$("tix").textContent=t("noTix");q.style.display="none"}
+ else{const k=tix[tix.length-1];$("tix").textContent=`${t(k.type)} · ${k.price}₸ · #${k.id}`;q.innerHTML=qr(k.id);q.style.display="block"}
+ $("hist").innerHTML=hist.length?hist.map(h=>`<div class="row"><span>${h}</span></div>`).join(""):t("noHist");
+}
+let tab=0;
+function showTab(){document.querySelectorAll(".tab").forEach((e,i)=>e.classList.toggle("on",i==tab));
+ document.querySelectorAll("#nav button").forEach((b,i)=>b.classList.toggle("on",i==tab))}
+$("lang").onchange=e=>{L=e.target.value;render()};
+$("big").onclick=()=>{document.body.classList.toggle("big");$("big").classList.toggle("on")};
+$("st").onchange=e=>{cur=+e.target.value;arrivals()};
+$("fav").onclick=()=>{fav.has(cur)?fav.delete(cur):fav.add(cur);arrivals();favs()};
+$("go").onclick=()=>{const a=+$("from").value,b=+$("to").value,n=Math.abs(a-b);
+ $("res").innerHTML=n?`<div class="row"><b>${S[a]} → ${S[b]}</b><span class="min">${n*4+(delay?7:0)} ${t("min")}</span></div><div class="mu">${n} ${L=="en"?"stops":"ост."} · ${P.adult}₸<br>${t("bus")}${10+b}</div>`:""};
+$("pay").onclick=()=>{const id=Math.floor(Math.random()*90000+10000);tix.push({id,type,price:P[type]});
+ hist.unshift(`${t("trip")}: ${S[cur]} · ${P[type]}₸`);tickets()};
+$("send").onclick=()=>$("rmsg").textContent=t("sent");
+$("delay").onclick=()=>{delay=!delay;render()};
+render();
+</script></body></html>
